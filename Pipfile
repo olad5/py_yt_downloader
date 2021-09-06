@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 youtube-dl = "*"
+"hurry.filesize" = "*"
 
 [dev-packages]
 
