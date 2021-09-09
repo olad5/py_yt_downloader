@@ -56,17 +56,19 @@ class Youtube_download:
         print(f"Downloading {self.result['title']}, size={filesize}")
         self.title = self.result['title']
         for item in ["(", ")",  " ", ",", ".", "'"]:
-            logging.debug(item)
+            # logging.debug(item)
             self.title  = self.title.replace(item, '_')
         self.title  = self.title.replace('__', '_')
         self.download_video(select_id)
 
     def download_video(self,select_id):
         ydl_opts ={
-            'format': select_id,
+            # 140 is hardcoded there because you can only merge m4a with mp4
+            'format': select_id + '+140' ,
             'outtmpl':self.title +  '.%(ext)s',
         }
 
+        logging.debug(ydl_opts['format'])
         logging.debug(self.url)
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download([ self.url ])
