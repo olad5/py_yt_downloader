@@ -6,6 +6,7 @@ import json
 import sys
 import pprint
 import logging
+import re
 
 logging.basicConfig(
     level=logging.DEBUG, format="Line %(lineno)d - %(message)s",
@@ -16,8 +17,30 @@ logging.basicConfig(
 
 class Youtube_download:
     def __init__(self):
-        self.show_formats()
+        # self.show_formats()
+        self.format_link()
 
+    def format_link(self):
+        self.url  = sys.argv[1]
+        video_link_regex = re.compile(r'(https?://)?(www\.)?youtube\.(com|nl)/watch\?v=([\w-]+)(&.*?)')
+        playlist_link_regex = re.compile(r'(https?://)?(www\.)?youtube\.(com|nl)/playlist\?list=([\w-]+)')
+        # check if it's a single video link
+        if  video_link_regex.search(self.url):
+            logging. debug('hello')
+            result_regex  = video_link_regex.search(self.url)
+            video_link  = result_regex.group().split('&')[0]
+            logging.debug(video_link)
+        # check if it's a playlist link
+        elif playlist_link_regex.search(self.url):
+            logging. debug('Yes it a playlist')
+            result_regex  = playlist_link_regex.search(self.url)
+            playlist_link  = result_regex.group().split('&')[0]
+            logging.debug(playlist_link)
+        # check if link is not a youtube link
+        else:
+            logging.debug('Not even a yt link')
+            sys. exit()
+        sys.exit()
 
 
     def show_formats(self):
@@ -25,6 +48,8 @@ class Youtube_download:
         # Youtube link
         #  demo link 'https://www.youtube.com/watch?v=YSy2lBZ1QrA'
         self.url  = sys.argv[1]
+
+
         self.ydl = youtube_dl.YoutubeDL()
         # uses the youtube_dl as a context manager
         with self.ydl:
@@ -48,7 +73,7 @@ class Youtube_download:
 
 
     def request_id(self):
-        select_id =  input("Pick an a video id to download \n")
+        select_id =  input("Pick a video id to download \n>>> ")
         # select_id = str ( 160 )
         select_dict = [format for format in self.result['formats'] if format['format_id'] == select_id][0]
         filesize=size( ( select_dict['filesize']  ))
@@ -73,7 +98,6 @@ class Youtube_download:
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download([ self.url ])
             shutil.move(self.title+'.mp4' ,'data')
-
 
 
 
