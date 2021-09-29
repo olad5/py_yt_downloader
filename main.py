@@ -17,44 +17,66 @@ logging.basicConfig(
 
 class Youtube_download:
     def __init__(self):
-        # self.show_formats()
         self.format_link()
 
     def format_link(self):
+        """
+        Function to check if the link for a single video or a playlist
+        """
         self.url  = sys.argv[1]
-        video_link_regex = re.compile(r'(https?://)?(www\.)?youtube\.(com|nl)/watch\?v=([\w-]+)(&.*?)')
+        video_link_regex = re.compile(r'(https?://)?(www\.)?youtube\.(com|nl)/watch\?v=([\w-]+)')
         playlist_link_regex = re.compile(r'(https?://)?(www\.)?youtube\.(com|nl)/playlist\?list=([\w-]+)')
         # check if it's a single video link
         if  video_link_regex.search(self.url):
-            logging. debug('hello')
+            # logging. debug('hello')
             result_regex  = video_link_regex.search(self.url)
-            video_link  = result_regex.group().split('&')[0]
-            logging.debug(video_link)
+            self. url  = result_regex.group().split('&')[0]
+            self.show_formats()
         # check if it's a playlist link
         elif playlist_link_regex.search(self.url):
             logging. debug('Yes it a playlist')
             result_regex  = playlist_link_regex.search(self.url)
             playlist_link  = result_regex.group().split('&')[0]
             logging.debug(playlist_link)
+            self. get_videos_in_playlist()
         # check if link is not a youtube link
         else:
+            logging.debug(self. url)
             logging.debug('Not even a yt link')
             sys. exit()
-        sys.exit()
 
 
-    def show_formats(self):
-        # the link below is Ginger by Wizkid, you can replace it with any other
-        # Youtube link
-        #  demo link 'https://www.youtube.com/watch?v=YSy2lBZ1QrA'
-        self.url  = sys.argv[1]
+    def get_videos_in_playlist(self):
+        """
+        This shows the available formats for a single video
+        """
 
 
         self.ydl = youtube_dl.YoutubeDL()
         # uses the youtube_dl as a context manager
         with self.ydl:
-            self.result  =  self.ydl.extract_info(self.url,
-                                                  extra_info={'listformats':True},download=False)
+            self.result  =  self.ydl.extract_info(self.url, extra_info={'listformats':True},download=False)
+            for video in ( self. result['entries']):
+                video_id  = video['id']
+                self. url  = f'https://www.youtube.com/watch?v={video_id}'
+                self. show_formats()
+
+    # show_formats for single video link
+    def show_formats(self):
+        """
+        This shows the available formats for a single video
+        """
+
+        # the link below is Ginger by Wizkid, you can replace it with any other
+        # Youtube link
+        #  demo link 'https://www.youtube.com/watch?v=YSy2lBZ1QrA'
+        # self.url  = sys.argv[1]
+
+
+        self.ydl = youtube_dl.YoutubeDL()
+        # uses the youtube_dl as a context manager
+        with self.ydl:
+            self.result  =  self.ydl.extract_info(self.url, extra_info={'listformats':True},download=False)
             for format in  self.result['formats']:
                 format_id = format['format_id']
                 filesize = size( format['filesize'] ) if format['filesize'] else 0
@@ -67,13 +89,18 @@ class Youtube_download:
                                           str( ext), str(filesize)])
                 print(full_info)
             print()
+            print(f"Pick a format to download \n {self.result['title']}")
+
             self.request_id()
 
 
 
 
     def request_id(self):
-        select_id =  input("Pick a video id to download \n>>> ")
+        """
+        Requests the id of the format you want downloaded
+        """
+        select_id =  input("\n>>> ")
         # select_id = str ( 160 )
         select_dict = [format for format in self.result['formats'] if format['format_id'] == select_id][0]
         filesize=size( ( select_dict['filesize']  ))
