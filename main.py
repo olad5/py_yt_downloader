@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+# Personalized youtube dowloader based on YoutubeDL
+
 import youtube_dl
 import shutil
 from hurry.filesize import size
@@ -28,7 +30,6 @@ class Youtube_download:
             r'(https?://)?(www\.)?youtube\.(com|nl)/playlist\?list=([\w-]+)')
         # check if it's a single video link
         if video_link_regex.search(self.url):
-            # logging. debug('hello')
             result_regex = video_link_regex.search(self.url)
             self. url = result_regex.group().split('&')[0]
             self.show_formats()
@@ -37,11 +38,9 @@ class Youtube_download:
             logging. debug('Yes it a playlist')
             result_regex = playlist_link_regex.search(self.url)
             playlist_link = result_regex.group().split('&')[0]
-            logging.debug(playlist_link)
             self. get_videos_in_playlist()
         # check if link is not a youtube link
         else:
-            logging.debug(self. url)
             logging.debug('Not even a yt link')
             sys. exit()
 
@@ -98,17 +97,14 @@ class Youtube_download:
         Requests the id of the format you want downloaded
         """
         select_id = input("\n>>> ")
-        # select_id = str ( 160 )
         select_dict = [format for format in self.result['formats']
                        if format['format_id'] == select_id][0]
-        # logging.debug(select_dict['filesize'])
         filesize = size(select_dict['filesize']
                         ) if select_dict['filesize'] else 0
-        url = select_dict['url']
+        # url = select_dict['url']
         print(f"Downloading {self.result['title']}, size={filesize}")
         self.title = self.result['title']
         for item in ["(", ")",  " ", ",", ".", "'"]:
-            # logging.debug(item)
             self.title = self.title.replace(item, '_')
         self.title = self.title.replace('__', '_')
         self.download_video(select_id)
@@ -120,8 +116,6 @@ class Youtube_download:
             'outtmpl': self.title + '.%(ext)s',
         }
 
-        logging.debug(ydl_opts['format'])
-        logging.debug(self.url)
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download([self.url])
             shutil.move(self.title+'.mp4', 'data')
